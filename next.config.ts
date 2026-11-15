@@ -17,51 +17,55 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      // If accessed via a dedicated Sahayak domain (e.g. sahayak-sangwari.vercel.app or rail-sahayak.vercel.app)
-      {
-        source: "/",
-        has: [
-          {
-            type: "host",
-            value: "(?<prefix>.*)sahayak(?<suffix>.*)",
-          },
-        ],
-        destination: "/sahayak",
-      },
-      // If accessed via a dedicated Supervisor domain (e.g. rail-supervisor.vercel.app or supervisor.*)
-      {
-        source: "/",
-        has: [
-          {
-            type: "host",
-            value: "(?<prefix>.*)supervisor(?<suffix>.*)",
-          },
-        ],
-        destination: "/supervisor",
-      },
-      // Proxy API calls on the sahayak domain back to the core database on rail-sangwari so both projects share unified data
-      {
-        source: "/api/:path*",
-        has: [
-          {
-            type: "host",
-            value: "(?<prefix>.*)sahayak(?<suffix>.*)",
-          },
-        ],
-        destination: `https://${CORE_API_HOST}/api/:path*`,
-      },
-      {
-        source: "/api/:path*",
-        has: [
-          {
-            type: "host",
-            value: "(?<prefix>.*)supervisor(?<suffix>.*)",
-          },
-        ],
-        destination: `https://${CORE_API_HOST}/api/:path*`,
-      },
-    ];
+    return {
+      beforeFiles: [
+        // If accessed via a dedicated Sahayak domain (e.g. sahayak-sangwari.vercel.app or rail-sahayak.vercel.app)
+        {
+          source: "/",
+          has: [
+            {
+              type: "host",
+              value: "(?<prefix>.*)sahayak(?<suffix>.*)",
+            },
+          ],
+          destination: "/sahayak",
+        },
+        // If accessed via a dedicated Supervisor domain (e.g. rail-supervisor.vercel.app or supervisor.*)
+        {
+          source: "/",
+          has: [
+            {
+              type: "host",
+              value: "(?<prefix>.*)supervisor(?<suffix>.*)",
+            },
+          ],
+          destination: "/supervisor",
+        },
+        // Proxy API calls on the sahayak domain back to the core database on rail-sangwari so both projects share unified data
+        {
+          source: "/api/:path*",
+          has: [
+            {
+              type: "host",
+              value: "(?<prefix>.*)sahayak(?<suffix>.*)",
+            },
+          ],
+          destination: `https://${CORE_API_HOST}/api/:path*`,
+        },
+        {
+          source: "/api/:path*",
+          has: [
+            {
+              type: "host",
+              value: "(?<prefix>.*)supervisor(?<suffix>.*)",
+            },
+          ],
+          destination: `https://${CORE_API_HOST}/api/:path*`,
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
   },
 };
 

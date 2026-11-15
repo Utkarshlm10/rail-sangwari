@@ -10,7 +10,19 @@ import MyBookingsModal from "@/components/MyBookingsModal";
 
 export function ClientAppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isDedicatedPartnerHost, setIsDedicatedPartnerHost] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const h = window.location.hostname.toLowerCase();
+      if (h.includes("sahayak") || h.includes("supervisor") || h.includes("admin")) {
+        setIsDedicatedPartnerHost(true);
+      }
+    }
+  }, []);
+
   const isPassengerApp =
+    !isDedicatedPartnerHost &&
     !pathname.startsWith("/sahayak") &&
     !pathname.startsWith("/supervisor") &&
     !pathname.startsWith("/admin");

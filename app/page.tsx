@@ -8,10 +8,25 @@ import { BookingWidget } from "@/components/BookingWidget";
 import { VerifyBillaModal } from "@/components/VerifyBillaModal";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ShieldCheck, MapPin, Scale, Award, Sparkles } from "lucide-react";
+import SahayakPage from "./sahayak/page";
 
 export default function HomePage() {
   const { language, t } = useLanguage();
   const { openBillaModalWithId } = useBooking();
+  const [isSahayakHost, setIsSahayakHost] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const h = window.location.hostname.toLowerCase();
+      if (h.includes("sahayak")) {
+        setIsSahayakHost(true);
+      }
+    }
+  }, []);
+
+  if (isSahayakHost) {
+    return <SahayakPage />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col apple-glass-canvas transition-colors relative overflow-hidden">
