@@ -570,20 +570,15 @@ export function BookingWidget() {
                   </div>
                 </div>
 
-                {/* Instant Accept Trigger for Demonstration & Direct Testing */}
+                {/* Passenger Cancel Search Option */}
                 <div className="pt-2">
                   <button
                     type="button"
-                    onClick={() => acceptJob(activeBooking.id, "sahayak-bsp-108")}
-                    className="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95"
+                    onClick={resetBooking}
+                    className="w-full py-3 px-4 rounded-2xl bg-black/[0.05] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] text-slate-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95"
                   >
-                    <span>⚡ {language === "hi_cg" ? "कुली साथी द्वारा स्वीकार करें (BSP-108 रमेश यादव)" : "Accept Trip as Sahayak (BSP-108 Ramesh Yadav)"}</span>
+                    <span>{language === "hi_cg" ? "अनुरोध रद्द करें (Cancel Request)" : "Cancel Search Request"}</span>
                   </button>
-                  <p className="text-[10px] text-slate-500 dark:text-zinc-400 mt-2">
-                    {language === "hi_cg"
-                      ? "💡 या दूसरे टैब/मोबाइल पर पोर्ट 3001 (कुली साथी ऐप) खोलकर 'स्वीकार करें' दबाएं"
-                      : "💡 Or open Sahayak App on Port 3001 to click 'Accept' directly"}
-                  </p>
                 </div>
               </div>
             ) : (
