@@ -40,3 +40,5 @@ next-env.d.ts
 
 # Antigravity agent temp artifacts
 .antigravity
+
+.vercel
