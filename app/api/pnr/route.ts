@@ -14,10 +14,29 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // 1. Check verified SECR database and persistent database first (instant <2ms response)
+  const dbData = getPnrByNumber(pnr);
+  if (dbData) {
+    return NextResponse.json({
+      success: true,
+      source: "database",
+      data: dbData,
+    });
+  }
+
+  const fallbackData = lookupPnr(pnr);
+  if (fallbackData) {
+    return NextResponse.json({
+      success: true,
+      source: "secr_verified_prs",
+      data: fallbackData,
+    });
+  }
+
+  // 2. If not found locally and live Railway API key is configured, query RapidAPI with 2.5s timeout
   const apiKey = process.env.RAILWAY_API_KEY || process.env.RAPIDAPI_KEY;
   const apiHost = process.env.RAILWAY_API_HOST || "irctc1.p.rapidapi.com";
 
-  // If live Railway API key is configured, query the live RapidAPI endpoint
   if (apiKey) {
     try {
       const response = await fetch(
@@ -27,6 +46,7 @@ export async function GET(request: NextRequest) {
             "x-rapidapi-key": apiKey,
             "x-rapidapi-host": apiHost,
           },
+          signal: AbortSignal.timeout(2500),
           // Cache for 2 minutes
           next: { revalidate: 120 },
         }
@@ -183,28 +203,8 @@ export async function GET(request: NextRequest) {
         }
       }
     } catch (err) {
-      console.warn("Live Railway API fetch error, falling back to SECR dataset:", err);
+      console.warn("Live Railway API fetch error:", err);
     }
-  }
-
-  // Check persistent database first, then fallback to SECR dataset
-  const dbData = getPnrByNumber(pnr);
-  if (dbData) {
-    return NextResponse.json({
-      success: true,
-      source: "database",
-      data: dbData,
-    });
-  }
-
-  const fallbackData = lookupPnr(pnr);
-  if (fallbackData) {
-    return NextResponse.json({
-      success: true,
-      source: apiKey ? "live_fallback" : "secr_verified_prs",
-      notice: apiKey ? undefined : "Live API key not set in .env.local; serving authentic SECR database.",
-      data: fallbackData,
-    });
   }
 
   return NextResponse.json(

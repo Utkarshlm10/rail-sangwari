@@ -203,12 +203,12 @@ export function BentoGrid() {
               <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/70">
                 <div className="text-xs text-railway-textMuted">Medium Trolley</div>
                 <div className="text-base font-extrabold text-railway-navy mt-1">₹60</div>
-                <div className="text-[10px] text-emerald-700 font-semibold">Up to 35 kg</div>
+                <div className="text-[10px] text-emerald-700 font-semibold">Up to 20 kg</div>
               </div>
               <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/70">
                 <div className="text-xs text-railway-textMuted">Heavy Trunk</div>
                 <div className="text-base font-extrabold text-railway-navy mt-1">₹90</div>
-                <div className="text-[10px] text-emerald-700 font-semibold">Over 35 kg</div>
+                <div className="text-[10px] text-emerald-700 font-semibold">Over 20 kg</div>
               </div>
               <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/70">
                 <div className="text-xs text-amber-900 font-semibold">Small Bag</div>

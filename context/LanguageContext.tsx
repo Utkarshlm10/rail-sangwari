@@ -154,16 +154,16 @@ export const DICTIONARY: Translations = {
     hi_cg: "मझोला ट्रॉली / सूटकेस",
   },
   mediumTrolleyDesc: {
-    en: "Standard bags up to 35 kg (₹60)",
-    hi_cg: "मानक सूटकेस (३५ किलो तक) - ₹६०",
+    en: "Standard bags up to 20 kg (₹60)",
+    hi_cg: "मानक सूटकेस (२० किलो तक) - ₹६०",
   },
   heavyCartonTitle: {
     en: "Heavy Trunk / Carton Box",
     hi_cg: "भारी पेटी / कार्टन बक्सा",
   },
   heavyCartonDesc: {
-    en: "Iron boxes or heavy parcels >35 kg (₹90)",
-    hi_cg: "भारी बक्सा (>३५ किलो) - ₹९०",
+    en: "Iron boxes or heavy parcels >20 kg (₹90)",
+    hi_cg: "भारी बक्सा (>२० किलो) - ₹९०",
   },
   smallBagTitle: {
     en: "Small Cabin Bag / Backpack",

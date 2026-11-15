@@ -33,6 +33,9 @@ import {
   Star,
   Receipt,
   Radio,
+  Navigation,
+  Luggage,
+  Smartphone,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -93,7 +96,7 @@ export function BookingWidget() {
     setIsSearchingPnr(true);
     setSearchError("");
     try {
-      const res = await fetch(`/api/pnr?pnr=${cleaned}`);
+      const res = await fetch(`/api/pnr?pnr=${cleaned}`, { signal: AbortSignal.timeout(4000) });
       const json = await res.json();
       if (json.success && json.data) {
         setTrainDetails(json.data);
@@ -180,10 +183,15 @@ export function BookingWidget() {
         {step > 1 && (
           <button
             onClick={() => {
-              if (step === 3) resetBooking();
-              else setStep((step - 1) as 1 | 2);
+              if (step === 3) {
+                resetBooking();
+              } else if (typeof window !== "undefined" && window.history.length > 1) {
+                window.history.back();
+              } else {
+                setStep((step - 1) as 1 | 2);
+              }
             }}
-            className="text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 px-2.5 py-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            className="text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 px-2.5 py-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{step === 3 ? (language === "hi_cg" ? "नई बुकिंग" : "New Booking") : (language === "hi_cg" ? "पीछे" : "Back")}</span>
@@ -282,30 +290,81 @@ export function BookingWidget() {
                   </div>
                 </div>
 
-                {/* Pickup direction toggle */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setPickupDropMode("TRAIN_TO_EXIT")}
-                    className={`p-2 rounded-xl text-xs font-semibold transition-all text-center ${
-                      pickupDropMode === "TRAIN_TO_EXIT"
-                        ? "bg-[#0F2A4A] dark:bg-[#1E3A8A] text-white border border-amber-400/30 shadow-xs font-bold"
-                        : "apple-glass-subcard text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
-                    }`}
-                  >
-                    {t("arrivalMode")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPickupDropMode("ENTRY_TO_TRAIN")}
-                    className={`p-2 rounded-xl text-xs font-semibold transition-all text-center ${
-                      pickupDropMode === "ENTRY_TO_TRAIN"
-                        ? "bg-[#0F2A4A] dark:bg-[#1E3A8A] text-white border border-amber-400/30 shadow-xs font-bold"
-                        : "apple-glass-subcard text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
-                    }`}
-                  >
-                    {t("departureMode")}
-                  </button>
+                {/* Prominent Service Direction Selector (Item 4: Bold & Large Word Size) */}
+                <div className="space-y-2 pt-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                      <Navigation className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{language === "hi_cg" ? "कुली सेवा दिशा चुनें (Service Route):" : "Choose Porter Service Route:"}</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                      {pickupDropMode === "TRAIN_TO_EXIT"
+                        ? (language === "hi_cg" ? "आगमन सेवा" : "Arrival Service")
+                        : (language === "hi_cg" ? "प्रस्थान सेवा" : "Departure Service")}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Option 1: Train Coach -> Station Exit */}
+                    <button
+                      type="button"
+                      onClick={() => setPickupDropMode("TRAIN_TO_EXIT")}
+                      className={`p-3.5 rounded-2xl text-left transition-all relative cursor-pointer border ${
+                        pickupDropMode === "TRAIN_TO_EXIT"
+                          ? "bg-[#0F2A4A] dark:bg-[#1E3A8A] text-white border-amber-400 shadow-md ring-2 ring-amber-400/25"
+                          : "apple-glass-subcard text-slate-700 dark:text-zinc-300 hover:border-black/15 dark:hover:border-white/20 hover:bg-black/5 dark:hover:bg-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                          <span>🚉</span>
+                          <span>➔</span>
+                          <span>🚪</span>
+                        </span>
+                        {pickupDropMode === "TRAIN_TO_EXIT" && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow-xs">
+                            ✓ {language === "hi_cg" ? "चयनित" : "Selected"}
+                          </span>
+                        )}
+                      </div>
+                      <div className="font-black text-sm sm:text-base tracking-tight mt-1.5 leading-snug">
+                        {language === "hi_cg" ? "ट्रेन कोच ➔ स्टेशन निकास" : "Train Coach ➔ Station Exit"}
+                      </div>
+                      <p className={`text-[11px] mt-1 leading-snug ${pickupDropMode === "TRAIN_TO_EXIT" ? "text-amber-100/90" : "text-slate-500 dark:text-zinc-400"}`}>
+                        {language === "hi_cg" ? "कुली बोगी के दरवाजे पर मिलेगा और सामान टैक्सी/निकास द्वार तक ले जाएगा" : "Porter meets at Coach Door & carries luggage to Station Exit / Taxi"}
+                      </p>
+                    </button>
+
+                    {/* Option 2: Station Entry -> Coach Seat */}
+                    <button
+                      type="button"
+                      onClick={() => setPickupDropMode("ENTRY_TO_TRAIN")}
+                      className={`p-3.5 rounded-2xl text-left transition-all relative cursor-pointer border ${
+                        pickupDropMode === "ENTRY_TO_TRAIN"
+                          ? "bg-[#0F2A4A] dark:bg-[#1E3A8A] text-white border-amber-400 shadow-md ring-2 ring-amber-400/25"
+                          : "apple-glass-subcard text-slate-700 dark:text-zinc-300 hover:border-black/15 dark:hover:border-white/20 hover:bg-black/5 dark:hover:bg-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                          <span>🚪</span>
+                          <span>➔</span>
+                          <span>🚉</span>
+                        </span>
+                        {pickupDropMode === "ENTRY_TO_TRAIN" && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow-xs">
+                            ✓ {language === "hi_cg" ? "चयनित" : "Selected"}
+                          </span>
+                        )}
+                      </div>
+                      <div className="font-black text-sm sm:text-base tracking-tight mt-1.5 leading-snug">
+                        {language === "hi_cg" ? "स्टेशन प्रवेश ➔ ट्रेन सीट" : "Station Entry ➔ Coach Seat"}
+                      </div>
+                      <p className={`text-[11px] mt-1 leading-snug ${pickupDropMode === "ENTRY_TO_TRAIN" ? "text-amber-100/90" : "text-slate-500 dark:text-zinc-400"}`}>
+                        {language === "hi_cg" ? "कुली मुख्य प्रवेश द्वार पर मिलेगा और सामान आपकी आरक्षित सीट तक रखेगा" : "Porter meets at Main Gate & carries luggage into Train Seat / Berth"}
+                      </p>
+                    </button>
+                  </div>
                 </div>
 
                 {/* 2D Interactive Coach & FOB Platform Visualizer */}
@@ -321,45 +380,75 @@ export function BookingWidget() {
               </div>
             )}
 
-            {/* Mobile number */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-                  {t("phoneLabel")}
-                </label>
+            {/* Dedicated High-Prominence Passenger Phone & Proceed Pod (Item 3) */}
+            <div className="p-4 sm:p-5 rounded-3xl apple-glass-card border-2 border-amber-400/40 dark:border-amber-400/30 shadow-xl bg-gradient-to-b from-white/95 to-amber-500/[0.04] dark:from-zinc-900/95 dark:to-amber-500/[0.03] space-y-3.5 relative overflow-hidden">
+              {/* Header with Phone Icon and Status */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <label htmlFor="passenger-phone-input" className="block text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight">
+                      {language === "hi_cg" ? "यात्री मोबाइल नंबर दर्ज करें" : "Passenger Mobile Number"}
+                    </label>
+                    <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium block mt-0.5">
+                      {language === "hi_cg" ? "कुली साथी कॉल एवं व्हाट्सएप लाइव ट्रैकिंग हेतु" : "For Sahayak coach arrival calls & WhatsApp"}
+                    </span>
+                  </div>
+                </div>
+
                 {isPassengerLoggedIn ? (
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0">
                     <CheckCircle2 className="w-3 h-3" />
-                    <span>{passengerUser?.name}</span>
+                    <span className="truncate max-w-[70px]">{passengerUser?.name.split(" ")[0]}</span>
                   </span>
                 ) : (
                   <button
                     type="button"
                     onClick={openPassengerAuthModal}
-                    className="text-[10px] text-amber-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1"
+                    className="text-[10px] font-bold text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg bg-amber-400/10 border border-amber-400/20"
                   >
                     <Sparkles className="w-3 h-3 text-amber-500" />
-                    <span>{language === "hi_cg" ? "मुफ्त लॉगिन करें" : "Sign In with Free OTP"}</span>
+                    <span>{language === "hi_cg" ? "मुफ्त लॉगिन" : "Free Sign In"}</span>
                   </button>
                 )}
               </div>
-              <input
-                type="tel"
-                value={passengerPhone}
-                onChange={(e) => setPassengerPhone(e.target.value)}
-                placeholder={t("phonePlaceholder")}
-                className="w-full px-3.5 py-2.5 rounded-xl apple-glass-subcard text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-railway-navy dark:focus:border-amber-400 font-mono"
-              />
-            </div>
 
-            {/* CTA */}
-            <button
-              type="button"
-              onClick={handleProceedToStep2}
-              className="w-full py-3.5 px-4 rounded-2xl apple-glass-btn-primary text-white font-bold text-sm flex items-center justify-center gap-2 mt-2"
-            >
-              <span>{t("continueToLuggage")}</span>
-            </button>
+              {/* High-Contrast Phone Input Field with +91 Country Badge */}
+              <div className="relative flex items-center">
+                <div className="absolute left-2.5 px-2 py-1 rounded-xl bg-black/[0.05] dark:bg-white/[0.08] border border-black/[0.06] dark:border-white/10 flex items-center gap-1 text-xs font-black text-slate-800 dark:text-zinc-200 pointer-events-none">
+                  <span>🇮🇳</span>
+                  <span>+91</span>
+                </div>
+                <input
+                  id="passenger-phone-input"
+                  type="tel"
+                  maxLength={10}
+                  value={passengerPhone}
+                  onChange={(e) => setPassengerPhone(e.target.value.replace(/\D/g, ""))}
+                  placeholder={language === "hi_cg" ? "10 अंकों का मोबाइल नंबर" : "10-digit mobile number"}
+                  className="w-full pl-20 pr-4 py-3 rounded-2xl apple-glass-subcard text-base font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 font-mono tracking-wider transition-all placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal border border-black/10 dark:border-white/15"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-zinc-400 px-0.5">
+                <span className="flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>{language === "hi_cg" ? "गोपनीय: केवल आपके कुली साथी को साझा किया जाएगा" : "Zero spam: Shared only with assigned licensed porter"}</span>
+                </span>
+              </div>
+
+              {/* Big Vibrant Next Step Button */}
+              <button
+                type="button"
+                onClick={handleProceedToStep2}
+                className="w-full py-4 px-5 rounded-2xl apple-glass-btn-primary text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <Luggage className="w-4 h-4 text-amber-400" />
+                <span>{language === "hi_cg" ? "सामान चुनें एवं सरकारी दर देखें →" : "Choose Luggage & Calculate Govt Fare →"}</span>
+              </button>
+            </div>
           </motion.div>
         )}
 
@@ -456,17 +545,44 @@ export function BookingWidget() {
               </div>
             </div>
 
-            {/* Simple Glassy Fare Summary Box (Light & Dark Adaptive) */}
-            <div className="p-4 rounded-2xl apple-glass-subcard space-y-2 border border-black/[0.06] dark:border-white/[0.08] shadow-sm">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-zinc-400 font-semibold">{t("totalPorterFare")}</span>
-                <span className="font-black font-mono text-base text-slate-900 dark:text-white">
+            {/* Simple Glassy Fare Summary Box (Item 2: Interchanged: Small ₹39 Fee First, Total Amount Below) */}
+            <div className="p-4 rounded-2xl apple-glass-subcard space-y-3 border border-black/[0.06] dark:border-white/[0.08] shadow-sm">
+              {/* 1st: Breakdown with Small ₹39 Reservation Fee First */}
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center justify-between text-slate-700 dark:text-zinc-300">
+                  <span className="font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                    <span>{t("payToReserve")}</span>
+                  </span>
+                  <span className="font-black font-mono text-sm sm:text-base text-amber-600 dark:text-amber-400">
+                    ₹{fare.payNowFee}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-slate-500 dark:text-zinc-400">
+                  <span className="font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500/60 shrink-0" />
+                    <span>{t("payAfterDrop")}</span>
+                  </span>
+                  <span className="font-bold font-mono text-xs sm:text-sm text-slate-800 dark:text-zinc-200">
+                    ₹{fare.payToSahayakCash}
+                  </span>
+                </div>
+              </div>
+
+              {/* 2nd: Total Porter Charge (Interchanged to be below the small ₹39 fee) */}
+              <div className="pt-2.5 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+                <div>
+                  <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white block">
+                    {t("totalPorterFare")}
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-400 block mt-0.5">
+                    {language === "hi_cg" ? "दक्षिण पूर्व मध्य रेलवे सरकारी दर" : "SECR Official Govt Rate Card"}
+                  </span>
+                </div>
+                <span className="font-black font-mono text-xl sm:text-2xl text-slate-900 dark:text-white">
                   ₹{fare.totalAmount}
                 </span>
-              </div>
-              <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.08] text-[11px] text-slate-500 dark:text-zinc-400 flex items-center justify-between">
-                <span>{t("payToReserve")} <strong className="text-slate-800 dark:text-zinc-200">₹{fare.payNowFee}</strong></span>
-                <span>{t("payAfterDrop")} <strong className="text-slate-800 dark:text-zinc-200">₹{fare.payToSahayakCash}</strong></span>
               </div>
             </div>
 

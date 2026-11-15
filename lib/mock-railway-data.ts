@@ -394,9 +394,13 @@ export function getSahayakByBilla(billa: string): SahayakProfile | null {
 
 export function authenticateSahayak(billaNumber: string, pin: string): SahayakProfile | null {
   const norm = billaNumber.trim().toUpperCase().replace(/\s+/g, "");
-  const found = VERIFIED_SAHAYAKS.find(
-    (s) => s.billaNumber.toUpperCase().replace(/\s+/g, "") === norm
-  );
+  const cleanNorm = billaNumber.replace(/\D/g, "");
+  const found = VERIFIED_SAHAYAKS.find((s) => {
+    const matchBilla = s.billaNumber.toUpperCase().replace(/\s+/g, "") === norm;
+    const cleanPhone = s.phone.replace(/\D/g, "");
+    const matchPhone = cleanNorm.length >= 10 && cleanPhone.endsWith(cleanNorm.slice(-10));
+    return matchBilla || matchPhone;
+  });
   if (!found) return null;
 
   // Accept valid assigned PIN or universal demo master PIN "1234"

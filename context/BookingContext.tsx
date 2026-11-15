@@ -68,7 +68,7 @@ interface BookingContextType {
 
   // Porter / Supervisor Portal integration
   incomingJobs: IncomingJob[];
-  acceptJob: (jobId: string, sahayakId: string) => void;
+  acceptJob: (jobId: string, sahayakOrId?: string | SahayakProfile) => void;
   completeJobWithOtp: (jobId: string, enteredOtp: string) => { success: boolean; message: string };
   isSahayakOnline: boolean;
   setIsSahayakOnline: (online: boolean) => void;
@@ -293,6 +293,62 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     setFare(calculateFare(luggage));
   }, [luggage]);
 
+// Precedence ranks to prevent asynchronous/polling race conditions from rewinding status
+const STATUS_PRECEDENCE: Record<string, number> = {
+  SEARCHING: 10,
+  CONFIRMED: 10,
+  ASSIGNED: 20,
+  AT_PLATFORM: 30,
+  COMPLETED: 40,
+  CANCELLED: 0,
+};
+
+function isStatusMoreAdvanced(newStatus?: string, oldStatus?: string): boolean {
+  if (!newStatus || !oldStatus) return true;
+  return (STATUS_PRECEDENCE[newStatus] ?? 0) >= (STATUS_PRECEDENCE[oldStatus] ?? 0);
+}
+
+  // Mobile Hardware Back-Button & Browser History Sync (prevents app exit on Back)
+  const setStepWithHistory = (newStep: 1 | 2 | 3, replace = false) => {
+    setStep(newStep);
+    if (typeof window !== "undefined") {
+      const stepHash = newStep === 1 ? "#pnr" : newStep === 2 ? "#luggage" : "#tracking";
+      if (replace) {
+        window.history.replaceState({ step: newStep }, "", stepHash);
+      } else if (window.history.state?.step !== newStep) {
+        window.history.pushState({ step: newStep }, "", stepHash);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Establish baseline history state so first Back button press stays inside app
+    if (!window.history.state || window.history.state.step === undefined) {
+      window.history.replaceState({ step: 1 }, "", window.location.hash || "#pnr");
+    }
+
+    const onPopState = (e: PopStateEvent) => {
+      // 1. If billa modal is open, close modal on back
+      if (isBillaModalOpen) {
+        setIsBillaModalOpen(false);
+        return;
+      }
+
+      // 2. Otherwise navigate to the previous step rather than exiting app
+      const targetStep = e.state?.step;
+      if (targetStep === 1 || targetStep === 2 || targetStep === 3) {
+        setStep(targetStep);
+      } else {
+        setStep(1);
+      }
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isBillaModalOpen]);
+
   // Resilient Database Polling & Hydration Loop (Syncs every 3 seconds across all devices & tunnels)
   useEffect(() => {
     try {
@@ -322,9 +378,19 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
           setIncomingJobs((prev) => {
             const map = new Map<string, IncomingJob>();
-            // Add server jobs first
+            // Add server jobs, but CRITICAL: NEVER downgrade a locally advanced status!
             for (const dj of dbJobs) {
-              map.set(dj.id, dj);
+              const localJob = prev.find((p) => p.id === dj.id);
+              if (localJob && !isStatusMoreAdvanced(dj.status, localJob.status)) {
+                // Preserve local advanced status (e.g. ASSIGNED or COMPLETED) and assigned sahayak!
+                map.set(dj.id, {
+                  ...dj,
+                  status: localJob.status,
+                  sahayak: localJob.sahayak || dj.sahayak,
+                });
+              } else {
+                map.set(dj.id, dj);
+              }
             }
             // Keep any locally created pending jobs that haven't hit server yet
             for (const pj of prev) {
@@ -335,11 +401,18 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
             return Array.from(map.values());
           });
 
-          // Also keep activeBooking in sync if its status changed on another device
+          // Also keep activeBooking in sync without allowing stale polls to revert ASSIGNED -> SEARCHING
           setActiveBooking((current) => {
             if (!current) return current;
             const serverMatch = json.data.find((b: BookingRecord) => b.id === current.id);
-            if (serverMatch && (serverMatch.status !== current.status || (!current.sahayak && serverMatch.sahayak))) {
+            if (!serverMatch) return current;
+
+            // CRITICAL: Stale server polling must NEVER downgrade ASSIGNED or COMPLETED back to SEARCHING!
+            if (!isStatusMoreAdvanced(serverMatch.status, current.status)) {
+              return current;
+            }
+
+            if (serverMatch.status !== current.status || (!current.sahayak && serverMatch.sahayak)) {
               const updated = { ...current, ...serverMatch };
               if (serverMatch.sahayak) {
                 setAssignedSahayak(serverMatch.sahayak);
@@ -466,7 +539,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   const resetBooking = () => {
     setActiveBooking(null);
-    setStep(1);
+    setAssignedSahayak(null);
+    setStepWithHistory(1, true);
     try {
       localStorage.removeItem("rail_sangwari_active_booking");
     } catch {
@@ -498,8 +572,16 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const acceptJob = (jobId: string, sahayakId: string) => {
-    const sahayak = VERIFIED_SAHAYAKS.find((s) => s.id === sahayakId || s.billaNumber === sahayakId) || currentSahayak;
+  const acceptJob = async (jobId: string, sahayakOrId?: string | SahayakProfile) => {
+    let sahayak = currentSahayak;
+    if (typeof sahayakOrId === "object" && sahayakOrId !== null) {
+      sahayak = sahayakOrId;
+    } else if (typeof sahayakOrId === "string") {
+      const found = VERIFIED_SAHAYAKS.find((s) => s.id === sahayakOrId || s.billaNumber === sahayakOrId);
+      if (found) sahayak = found;
+    }
+
+    // 1. Instantly advance local state to ASSIGNED
     setIncomingJobs((prev) =>
       prev.map((job) => {
         if (job.id === jobId) {
@@ -523,22 +605,29 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     });
     setAssignedSahayak(sahayak);
 
-    // Broadcast job acceptance to passenger and other porters
+    // 2. Audible confirmation chime
+    playRailwayChime();
+
+    // 3. Broadcast job acceptance to passenger and other porters
     broadcastDispatchEvent("JOB_ACCEPTED", { jobId, sahayak });
 
-    // Sync acceptance to Firebase Firestore
+    // 4. Sync acceptance to Firebase Firestore
     syncJobStatusToFirebase(jobId, "ASSIGNED", sahayak);
 
-    // Sync status change to persistent database
+    // 5. Commit to persistent database and await to prevent stale race conditions
     if (typeof window !== "undefined") {
-      fetch("/api/database", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "UPDATE_BOOKING_STATUS",
-          payload: { bookingId: jobId, status: "ASSIGNED", sahayak },
-        }),
-      }).catch(() => {});
+      try {
+        await fetch("/api/database", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "UPDATE_BOOKING_STATUS",
+            payload: { bookingId: jobId, status: "ASSIGNED", sahayak },
+          }),
+        });
+      } catch (err) {
+        console.warn("DB accept update failed:", err);
+      }
     }
   };
 
@@ -594,7 +683,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     <BookingContext.Provider
       value={{
         step,
-        setStep,
+        setStep: setStepWithHistory,
         pnrInput,
         setPnrInput,
         trainDetails,
