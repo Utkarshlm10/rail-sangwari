@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useBooking } from "@/context/BookingContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { VERIFIED_SAHAYAKS } from "@/lib/mock-railway-data";
 import AppleAvatar from "@/components/AppleAvatar";
 import { CoachPlatformVisualizer } from "@/components/CoachPlatformVisualizer";
@@ -42,6 +43,9 @@ import {
   ChevronRight,
   Radio,
   Receipt,
+  Sun,
+  Moon,
+  Globe2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import {
@@ -53,7 +57,8 @@ import { generateUpiUri, generateQrSvgPath } from "@/lib/qr";
 import { IncomingJob } from "@/types";
 
 export default function SahayakPortalPage() {
-  const { language, t } = useLanguage();
+  const { language, toggleLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const {
     incomingJobs,
     acceptJob,
@@ -235,11 +240,64 @@ export default function SahayakPortalPage() {
   // =========================================================================
   if (!isSahayakLoggedIn) {
     return (
-      <div className="min-h-screen apple-glass-canvas text-slate-900 dark:text-white transition-colors relative overflow-hidden flex items-center justify-center p-4 sm:p-6">
+      <div className="min-h-screen apple-glass-canvas text-slate-900 dark:text-white transition-colors relative overflow-hidden flex flex-col justify-between p-4 sm:p-6">
         {/* Subtle Ambient Specular Mesh Lighting */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[550px] h-[320px] bg-gradient-to-tr from-black/[0.03] via-transparent to-black/[0.02] dark:from-white/[0.04] dark:via-transparent dark:to-white/[0.02] blur-3xl rounded-full pointer-events-none -z-10" />
 
-        <div className="w-full max-w-md apple-glass-card rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative border border-white/20 dark:border-white/10">
+        {/* Top Floating Utility Bar for Sahayak App (Theme + Language + Station Identity) */}
+        <header className="w-full max-w-md mx-auto flex items-center justify-between py-2.5 px-1 relative z-20">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl brass-badge flex flex-col items-center justify-center text-slate-950 font-black shadow-sm border border-amber-300 shrink-0">
+              <span className="text-[7px] uppercase tracking-wider font-extrabold text-amber-950/70">SECR</span>
+              <span className="text-[11px] font-black leading-none text-slate-950">दपूमरे</span>
+            </div>
+            <div>
+              <span className="font-extrabold text-xs text-slate-900 dark:text-white block leading-tight">
+                {language === "hi_cg" ? "कुली साथी पोर्टल" : "Sahayak Partner"}
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold block">
+                Bilaspur • Raipur • Durg
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {/* Language Toggle */}
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.06] dark:border-white/10 text-xs font-bold text-slate-800 dark:text-white transition-all active:scale-95 shadow-xs"
+              title={language === "en" ? "हिंदी / छत्तीसगढ़ी में बदलें" : "Switch to English"}
+            >
+              <Globe2 className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
+              <span className={language === "en" ? "text-slate-900 dark:text-white font-black" : "text-slate-400"}>
+                EN
+              </span>
+              <span className="text-slate-300 dark:text-zinc-600">|</span>
+              <span className={language === "hi_cg" ? "text-slate-900 dark:text-white font-black" : "text-slate-400"}>
+                छ.ग.
+              </span>
+            </button>
+
+            {/* Theme Toggle (Sun / Moon) */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="p-2 rounded-full bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.06] dark:border-white/10 text-slate-700 dark:text-zinc-200 transition-all active:scale-90 shadow-xs"
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-amber-300" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-700" />
+              )}
+            </button>
+          </div>
+        </header>
+
+        {/* Sign In Card */}
+        <div className="w-full max-w-md mx-auto apple-glass-card rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative border border-white/20 dark:border-white/10 my-auto">
           
           {/* SECR Licensed Sahayak Identity Header */}
           <div className="text-center space-y-3">
@@ -438,8 +496,38 @@ export default function SahayakPortalPage() {
             </div>
           </div>
 
-          {/* Quick Actions (Sound Chime, PWA, Exit Shift) */}
+          {/* Quick Actions (Theme, Language, Sound Chime, PWA, Exit Shift) */}
           <div className="flex items-center gap-1.5">
+            {/* Language Toggle */}
+            <button
+              onClick={toggleLanguage}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl apple-glass-subcard hover:bg-black/5 dark:hover:bg-white/10 border border-black/[0.06] dark:border-white/10 text-xs font-bold text-slate-800 dark:text-white transition-all active:scale-95 shadow-xs"
+              title={language === "en" ? "हिंदी / छत्तीसगढ़ी में बदलें" : "Switch to English"}
+            >
+              <Globe2 className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
+              <span className={language === "en" ? "text-slate-900 dark:text-white font-black" : "text-slate-400"}>
+                EN
+              </span>
+              <span className="text-slate-300 dark:text-zinc-600">|</span>
+              <span className={language === "hi_cg" ? "text-slate-900 dark:text-white font-black" : "text-slate-400"}>
+                छ.ग.
+              </span>
+            </button>
+
+            {/* Theme Toggle (Sun / Moon) */}
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="p-2 rounded-xl apple-glass-subcard hover:bg-black/5 dark:hover:bg-white/10 border border-black/[0.06] dark:border-white/10 text-slate-700 dark:text-zinc-200 transition-all active:scale-90 shadow-xs"
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-amber-300" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-700" />
+              )}
+            </button>
+
             {/* Audio Chime Toggle */}
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}

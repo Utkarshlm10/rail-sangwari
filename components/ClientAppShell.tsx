@@ -38,7 +38,7 @@ export function ClientAppShell({ children }: { children: React.ReactNode }) {
         </>
       )}
 
-      <main className={`flex-1 ${isPassengerApp ? "pt-16 sm:pt-20" : ""}`}>
+      <main className={`flex-1 ${isPassengerApp ? "pt-20 sm:pt-24" : ""}`}>
         {children}
       </main>
 

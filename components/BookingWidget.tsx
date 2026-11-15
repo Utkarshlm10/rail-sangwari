@@ -617,50 +617,6 @@ export function BookingWidget() {
                   </div>
                 </div>
 
-                {/* Sahayak Profile Row with AppleAvatar */}
-                {assignedSahayak && (
-                  <div className="p-3.5 rounded-2xl apple-glass-subcard border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between backdrop-blur-md">
-                    <div className="flex items-center gap-3">
-                      <AppleAvatar
-                        name={assignedSahayak.name}
-                        billaNumber={assignedSahayak.billaNumber}
-                        size="md"
-                      />
-                      <div>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white block">
-                          {language === "hi_cg" ? assignedSahayak.hindiName : assignedSahayak.name}
-                        </span>
-                        <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-semibold">
-                          Billa #{assignedSahayak.billaNumber} ({assignedSahayak.rating}★)
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <a
-                        href={`tel:${assignedSahayak.phone}`}
-                        className="p-2.5 rounded-xl bg-[#0F2A4A] hover:bg-[#1E3A8A] text-white border border-amber-400/30 transition-all shadow-xs active:scale-95"
-                        title="Call Sahayak"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </a>
-                      <a
-                        href={`https://wa.me/91${assignedSahayak.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                          language === "hi_cg"
-                            ? `नमस्ते ${assignedSahayak.hindiName} जी, मेरा गंतव्य कोच ${activeBooking.trainDetails.coach} सीट ${activeBooking.trainDetails.berth} है।`
-                            : `Hello ${assignedSahayak.name}, my destination is Coach ${activeBooking.trainDetails.coach} Seat ${activeBooking.trainDetails.berth}`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-white transition-all shadow-xs active:scale-95"
-                        title="WhatsApp Sahayak"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                      </a>
-                    </div>
-                  </div>
-                )}
-
                 {/* High-Contrast Apple Security Pass Capsule (Happy Code OTP) */}
                 <div className="p-4 rounded-2xl bg-slate-950 dark:bg-zinc-900 text-white border border-black/10 dark:border-white/10 flex items-center justify-between shadow-lg">
                   <div>
