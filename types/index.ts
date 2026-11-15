@@ -68,6 +68,7 @@ export interface PassengerUser {
 export type PickupDropMode = "TRAIN_TO_EXIT" | "ENTRY_TO_TRAIN";
 
 export type BookingStatus =
+  | "SEARCHING"
   | "CONFIRMED"
   | "ASSIGNED"
   | "AT_PLATFORM"

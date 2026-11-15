@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { VERIFIED_SAHAYAKS } from "@/lib/mock-railway-data";
 import AppleAvatar from "@/components/AppleAvatar";
 import { CoachPlatformVisualizer } from "@/components/CoachPlatformVisualizer";
-import { LiveCoolieTracker } from "@/components/LiveCoolieTracker";
+import { GoogleStyleLiveMap } from "@/components/GoogleStyleLiveMap";
 import { PostTripFeedbackReceiptModal } from "@/components/PostTripFeedbackReceiptModal";
 import {
   Train,
@@ -168,7 +168,7 @@ export default function SahayakPortalPage() {
       setCountdownSeconds((prev) => {
         const next = { ...prev };
         incomingJobs.forEach((job) => {
-          if (job.status === "CONFIRMED") {
+          if (job.status === "CONFIRMED" || job.status === "SEARCHING") {
             const current = next[job.id] !== undefined ? next[job.id] : 25;
             next[job.id] = Math.max(0, current - 1);
           }
@@ -227,7 +227,7 @@ export default function SahayakPortalPage() {
   const activeAssignedJobs = stationJobs.filter(
     (j) => j.status === "ASSIGNED" || j.status === "AT_PLATFORM"
   );
-  const pendingJobs = stationJobs.filter((j) => j.status === "CONFIRMED");
+  const pendingJobs = stationJobs.filter((j) => j.status === "CONFIRMED" || j.status === "SEARCHING");
   const completedJobs = stationJobs.filter((j) => j.status === "COMPLETED");
 
   // =========================================================================
@@ -679,8 +679,8 @@ export default function SahayakPortalPage() {
                   stationName={job.trainDetails.boardingStation || job.trainDetails.stationName}
                 />
 
-                {/* Real-Time Live Coolie & Platform Tracker (Coolie Driver View) */}
-                <LiveCoolieTracker
+                {/* Real-Time Live Coolie & Platform Tracker (Google Maps Live View) */}
+                <GoogleStyleLiveMap
                   bookingId={job.id}
                   sahayak={displaySahayak}
                   targetCoach={job.trainDetails.coach}

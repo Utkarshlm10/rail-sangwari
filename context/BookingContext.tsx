@@ -339,8 +339,14 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           setActiveBooking((current) => {
             if (!current) return current;
             const serverMatch = json.data.find((b: BookingRecord) => b.id === current.id);
-            if (serverMatch && serverMatch.status !== current.status) {
+            if (serverMatch && (serverMatch.status !== current.status || (!current.sahayak && serverMatch.sahayak))) {
               const updated = { ...current, ...serverMatch };
+              if (serverMatch.sahayak) {
+                setAssignedSahayak(serverMatch.sahayak);
+              }
+              if (current.status === "SEARCHING" && serverMatch.status === "ASSIGNED") {
+                playCompletionDing();
+              }
               try {
                 localStorage.setItem("rail_sangwari_active_booking", JSON.stringify(updated));
               } catch {
@@ -402,7 +408,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   const confirmBooking = () => {
     if (!trainDetails) return;
 
-    const sahayak = getAssignedSahayak(trainDetails.stationCode);
     const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
     const newBookingId = `RS-${Date.now().toString().slice(-6)}`;
 
@@ -415,8 +420,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       trainDetails,
       luggage,
       fare,
-      sahayak,
-      status: "ASSIGNED",
+      status: "SEARCHING",
       happyCode: generatedOtp,
       createdAt: "Just now",
       meetingPoint:
@@ -426,11 +430,11 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     };
 
     setActiveBooking(newBooking);
-    setAssignedSahayak(sahayak);
+    setAssignedSahayak(null);
     setHappyCode(generatedOtp);
     setStep(3);
 
-    // Also inject into incomingJobs for the Sahayak Portal
+    // Inject into incomingJobs as high-priority pending job for the Sahayak Portal
     const newJob: IncomingJob = {
       ...newBooking,
       urgency: "HIGH",
@@ -495,7 +499,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   };
 
   const acceptJob = (jobId: string, sahayakId: string) => {
-    const sahayak = VERIFIED_SAHAYAKS.find((s) => s.id === sahayakId) || currentSahayak;
+    const sahayak = VERIFIED_SAHAYAKS.find((s) => s.id === sahayakId || s.billaNumber === sahayakId) || currentSahayak;
     setIncomingJobs((prev) =>
       prev.map((job) => {
         if (job.id === jobId) {
@@ -505,9 +509,19 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    if (activeBooking && activeBooking.id === jobId) {
-      updateBookingStatus("ASSIGNED");
-    }
+    setActiveBooking((prev) => {
+      if (prev && prev.id === jobId) {
+        const updated = { ...prev, sahayak, status: "ASSIGNED" as BookingStatus };
+        try {
+          localStorage.setItem("rail_sangwari_active_booking", JSON.stringify(updated));
+        } catch {
+          // ignore
+        }
+        return updated;
+      }
+      return prev;
+    });
+    setAssignedSahayak(sahayak);
 
     // Broadcast job acceptance to passenger and other porters
     broadcastDispatchEvent("JOB_ACCEPTED", { jobId, sahayak });

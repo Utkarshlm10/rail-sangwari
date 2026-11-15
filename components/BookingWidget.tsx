@@ -8,7 +8,7 @@ import { useBooking } from "@/context/BookingContext";
 import { useAuth } from "@/context/AuthContext";
 import AppleAvatar from "@/components/AppleAvatar";
 import { CoachPlatformVisualizer } from "@/components/CoachPlatformVisualizer";
-import { LiveCoolieTracker } from "@/components/LiveCoolieTracker";
+import { GoogleStyleLiveMap } from "@/components/GoogleStyleLiveMap";
 import { PostTripFeedbackReceiptModal } from "@/components/PostTripFeedbackReceiptModal";
 import { lookupPnr } from "@/lib/mock-railway-data";
 import {
@@ -32,6 +32,7 @@ import {
   Share2,
   Star,
   Receipt,
+  Radio,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -60,6 +61,7 @@ export function BookingWidget() {
     assignedSahayak,
     confirmBooking,
     resetBooking,
+    acceptJob,
   } = useBooking();
 
   // Auto-populate logged-in passenger details
@@ -499,119 +501,206 @@ export function BookingWidget() {
             transition={{ duration: 0.2 }}
             className="space-y-4"
           >
-            {/* Apple Wallet Style Glass Ticket (Adaptive Light & Dark) */}
-            <div className="apple-glass-wallet-pass rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 relative overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.08] pb-3">
-                <div>
-                  <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider block">
-                    {t("secrPassTitle")}
-                  </span>
-                  <span className="text-xs font-bold font-mono text-slate-900 dark:text-white">
-                    {activeBooking.id}
-                  </span>
+            {/* If still searching for porter, show dedicated Searching Radar UI */}
+            {activeBooking.status === "SEARCHING" ? (
+              <div className="apple-glass-card rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 border-2 border-amber-500/50 relative overflow-hidden">
+                {/* Concentric Radar Animation */}
+                <div className="relative mx-auto w-32 h-32 flex items-center justify-center">
+                  <span className="absolute inset-0 rounded-full border-2 border-amber-400/30 animate-ping" />
+                  <span className="absolute inset-3 rounded-full border border-amber-400/50 animate-pulse" />
+                  <span className="absolute inset-6 rounded-full bg-gradient-to-tr from-amber-500/20 to-amber-300/10 blur-md" />
+                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-[#0F2A4A] text-amber-300 border-2 border-amber-400/80 flex items-center justify-center text-2xl shadow-xl">
+                    <Radio className="w-8 h-8 animate-spin" style={{ animationDuration: "6s" }} />
+                  </div>
                 </div>
-                <span className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
-                  {activeBooking.status === "COMPLETED" ? t("completedStatus") : t("assignedStatus")}
-                </span>
-              </div>
 
-              {/* Coolie Destination Highlight */}
-              <div className="p-4 rounded-2xl coolie-target-radar flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-[#0F2A4A] dark:text-amber-400 uppercase tracking-widest font-black block">
-                    {t("targetDestination")}
-                  </span>
-                  <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white block mt-0.5">
-                    Coach {activeBooking.trainDetails.coach} • Seat {activeBooking.trainDetails.berth}
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-zinc-400 block mt-0.5">
-                    {activeBooking.trainDetails.trainName} • PF-{activeBooking.trainDetails.platform} • {activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName}
-                  </span>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold mb-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>
+                      {activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName} • PF {activeBooking.trainDetails.platform}
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                    {language === "hi_cg" ? "निकटतम SECR कुली साथी खोज रहे हैं..." : "Searching for SECR Licensed Sahayak..."}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
+                    {language === "hi_cg"
+                      ? "स्टेशन कॉनकोर्स एवं प्लेटफॉर्म 2 पर उपस्थित कुलियों को आपका अनुरोध भेज दिया गया है। कुली के 'स्वीकार' (Accept) करते ही विवरण यहाँ दिखेगा।"
+                      : "Booking request broadcasted to on-duty porters at station concourse & Platform 2. Trip details will appear once accepted."}
+                  </p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0F2A4A] to-[#071526] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs shrink-0">
-                  <Target className="w-5 h-5" />
+
+                {/* Target Coach & Fare Pill */}
+                <div className="p-4 rounded-2xl apple-glass-subcard border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between text-left">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      Target Meeting Coach
+                    </span>
+                    <span className="text-base font-black text-slate-900 dark:text-white">
+                      Coach {activeBooking.trainDetails.coach} • Seat {activeBooking.trainDetails.berth}
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400 block">
+                      {activeBooking.trainDetails.trainNumber} - {activeBooking.trainDetails.trainName}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      Total Fare
+                    </span>
+                    <span className="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400">
+                      ₹{activeBooking.fare.totalAmount}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Live Steps Ticker */}
+                <div className="space-y-2 text-xs text-slate-600 dark:text-zinc-400 text-left p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04]">
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span>✓</span>
+                    <span>1. {language === "hi_cg" ? "पीएनआर एवं बोगी स्थान सत्यापित" : "PNR & Coach location verified"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span>✓</span>
+                    <span>2. {language === "hi_cg" ? "प्लेटफॉर्म कुली रोस्टर को रेडियो संदेश प्रेषित" : "Radio dispatch alert sent to platform porters"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span>3. {language === "hi_cg" ? "कुली साथी द्वारा स्वीकार (Accept) किए जाने की प्रतीक्षा..." : "Waiting for porter to accept trip..."}</span>
+                  </div>
+                </div>
+
+                {/* Instant Accept Trigger for Demonstration & Direct Testing */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => acceptJob(activeBooking.id, "sahayak-bsp-108")}
+                    className="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95"
+                  >
+                    <span>⚡ {language === "hi_cg" ? "कुली साथी द्वारा स्वीकार करें (BSP-108 रमेश यादव)" : "Accept Trip as Sahayak (BSP-108 Ramesh Yadav)"}</span>
+                  </button>
+                  <p className="text-[10px] text-slate-500 dark:text-zinc-400 mt-2">
+                    {language === "hi_cg"
+                      ? "💡 या दूसरे टैब/मोबाइल पर पोर्ट 3001 (कुली साथी ऐप) खोलकर 'स्वीकार करें' दबाएं"
+                      : "💡 Or open Sahayak App on Port 3001 to click 'Accept' directly"}
+                  </p>
                 </div>
               </div>
+            ) : (
+              /* Apple Wallet Style Glass Ticket (Adaptive Light & Dark) */
+              <div className="apple-glass-wallet-pass rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 relative overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.08] pb-3">
+                  <div>
+                    <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider block">
+                      {t("secrPassTitle")}
+                    </span>
+                    <span className="text-xs font-bold font-mono text-slate-900 dark:text-white">
+                      {activeBooking.id}
+                    </span>
+                  </div>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
+                    {activeBooking.status === "COMPLETED" ? t("completedStatus") : t("assignedStatus")}
+                  </span>
+                </div>
 
-              {/* Sahayak Profile Row with AppleAvatar */}
-              {assignedSahayak && (
-                <div className="p-3.5 rounded-2xl apple-glass-subcard border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between backdrop-blur-md">
-                  <div className="flex items-center gap-3">
-                    <AppleAvatar
-                      name={assignedSahayak.name}
-                      billaNumber={assignedSahayak.billaNumber}
-                      size="md"
-                    />
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white block">
-                        {language === "hi_cg" ? assignedSahayak.hindiName : assignedSahayak.name}
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-semibold">
-                        Billa #{assignedSahayak.billaNumber} ({assignedSahayak.rating}★)
-                      </span>
+                {/* Coolie Destination Highlight */}
+                <div className="p-4 rounded-2xl coolie-target-radar flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-[#0F2A4A] dark:text-amber-400 uppercase tracking-widest font-black block">
+                      {t("targetDestination")}
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white block mt-0.5">
+                      Coach {activeBooking.trainDetails.coach} • Seat {activeBooking.trainDetails.berth}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400 block mt-0.5">
+                      {activeBooking.trainDetails.trainName} • PF-{activeBooking.trainDetails.platform} • {activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName}
+                    </span>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0F2A4A] to-[#071526] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs shrink-0">
+                    <Target className="w-5 h-5" />
+                  </div>
+                </div>
+
+                {/* Sahayak Profile Row with AppleAvatar */}
+                {assignedSahayak && (
+                  <div className="p-3.5 rounded-2xl apple-glass-subcard border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between backdrop-blur-md">
+                    <div className="flex items-center gap-3">
+                      <AppleAvatar
+                        name={assignedSahayak.name}
+                        billaNumber={assignedSahayak.billaNumber}
+                        size="md"
+                      />
+                      <div>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white block">
+                          {language === "hi_cg" ? assignedSahayak.hindiName : assignedSahayak.name}
+                        </span>
+                        <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-semibold">
+                          Billa #{assignedSahayak.billaNumber} ({assignedSahayak.rating}★)
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <a
+                        href={`tel:${assignedSahayak.phone}`}
+                        className="p-2.5 rounded-xl bg-[#0F2A4A] hover:bg-[#1E3A8A] text-white border border-amber-400/30 transition-all shadow-xs active:scale-95"
+                        title="Call Sahayak"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                      <a
+                        href={`https://wa.me/91${assignedSahayak.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                          language === "hi_cg"
+                            ? `नमस्ते ${assignedSahayak.hindiName} जी, मेरा गंतव्य कोच ${activeBooking.trainDetails.coach} सीट ${activeBooking.trainDetails.berth} है।`
+                            : `Hello ${assignedSahayak.name}, my destination is Coach ${activeBooking.trainDetails.coach} Seat ${activeBooking.trainDetails.berth}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-white transition-all shadow-xs active:scale-95"
+                        title="WhatsApp Sahayak"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </a>
                     </div>
                   </div>
+                )}
 
-                  <div className="flex items-center gap-1.5">
-                    <a
-                      href={`tel:${assignedSahayak.phone}`}
-                      className="p-2.5 rounded-xl bg-[#0F2A4A] hover:bg-[#1E3A8A] text-white border border-amber-400/30 transition-all shadow-xs active:scale-95"
-                      title="Call Sahayak"
-                    >
-                      <Phone className="w-4 h-4" />
-                    </a>
-                    <a
-                      href={`https://wa.me/91${assignedSahayak.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                        language === "hi_cg"
-                          ? `नमस्ते ${assignedSahayak.hindiName} जी, मेरा गंतव्य कोच ${activeBooking.trainDetails.coach} सीट ${activeBooking.trainDetails.berth} है।`
-                          : `Hello ${assignedSahayak.name}, my destination is Coach ${activeBooking.trainDetails.coach} Seat ${activeBooking.trainDetails.berth}`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-white transition-all shadow-xs active:scale-95"
-                      title="WhatsApp Sahayak"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                    </a>
+                {/* High-Contrast Apple Security Pass Capsule (Happy Code OTP) */}
+                <div className="p-4 rounded-2xl bg-slate-950 dark:bg-zinc-900 text-white border border-black/10 dark:border-white/10 flex items-center justify-between shadow-lg">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                      {t("happyCodeLabel")}
+                    </span>
+                    <span className="text-[11px] text-zinc-300 font-medium">
+                      {t("happyCodeDesc")}
+                    </span>
                   </div>
+                  <span className="font-mono text-2xl sm:text-3xl font-black tracking-[0.2em] text-white">
+                    {happyCode}
+                  </span>
                 </div>
-              )}
 
-              {/* High-Contrast Apple Security Pass Capsule (Happy Code OTP) */}
-              <div className="p-4 rounded-2xl bg-slate-950 dark:bg-zinc-900 text-white border border-black/10 dark:border-white/10 flex items-center justify-between shadow-lg">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
-                    {t("happyCodeLabel")}
-                  </span>
-                  <span className="text-[11px] text-zinc-300 font-medium">
-                    {t("happyCodeDesc")}
-                  </span>
-                </div>
-                <span className="font-mono text-2xl sm:text-3xl font-black tracking-[0.2em] text-white">
-                  {happyCode}
-                </span>
+                {/* Real-Time Live Google Maps Tracker (Continuous Automatic Movement) */}
+                <GoogleStyleLiveMap
+                  bookingId={activeBooking.id}
+                  sahayak={assignedSahayak || activeBooking.sahayak}
+                  targetCoach={activeBooking.trainDetails.coach}
+                  platform={activeBooking.trainDetails.platform}
+                  stationCode={activeBooking.trainDetails.stationCode}
+                  stationName={activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName}
+                />
+
+                {/* 2D Interactive Coach & FOB Platform Visualizer */}
+                <CoachPlatformVisualizer
+                  targetCoach={activeBooking.trainDetails.coach}
+                  platform={activeBooking.trainDetails.platform}
+                  trainNumber={activeBooking.trainDetails.trainNumber}
+                  trainName={activeBooking.trainDetails.trainName}
+                  stationName={activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName}
+                />
               </div>
-
-              {/* Real-Time Live Coolie & Platform Tracker */}
-              <LiveCoolieTracker
-                bookingId={activeBooking.id}
-                sahayak={assignedSahayak || activeBooking.sahayak}
-                targetCoach={activeBooking.trainDetails.coach}
-                platform={activeBooking.trainDetails.platform}
-                stationCode={activeBooking.trainDetails.stationCode}
-                stationName={activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName}
-              />
-
-              {/* 2D Interactive Coach & FOB Platform Visualizer */}
-              <CoachPlatformVisualizer
-                targetCoach={activeBooking.trainDetails.coach}
-                platform={activeBooking.trainDetails.platform}
-                trainNumber={activeBooking.trainDetails.trainNumber}
-                trainName={activeBooking.trainDetails.trainName}
-                stationName={activeBooking.trainDetails.boardingStation || activeBooking.trainDetails.stationName}
-              />
-            </div>
+            )}
 
             {/* Option B: Trip Completed Banner if verified */}
             {activeBooking.status === "COMPLETED" && (
