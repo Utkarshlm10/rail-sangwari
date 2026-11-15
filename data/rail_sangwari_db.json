@@ -1,0 +1,210 @@
+{
+  "bookings": [],
+  "sahayaks": [
+    {
+      "id": "sahayak-bsp-108",
+      "billaNumber": "BSP-108",
+      "pin": "1080",
+      "name": "Ramesh Yadav",
+      "hindiName": "रमेश यादव",
+      "stationCode": "BSP",
+      "stationName": "Bilaspur Junction",
+      "phone": "+91 98271 44521",
+      "rating": 4.9,
+      "reviewsCount": 312,
+      "completedTrips": 284,
+      "photoUrl": "/images/coolie-1.png",
+      "policeVerified": true,
+      "medicalFitnessValidTill": "2027-03-31",
+      "experienceYears": 14,
+      "languages": [
+        "Hindi",
+        "Chhattisgarhi"
+      ],
+      "currentLocation": "Platform 2 • Near FOB 2 Lift",
+      "isActive": true
+    },
+    {
+      "id": "sahayak-r-042",
+      "billaNumber": "R-042",
+      "pin": "0420",
+      "name": "Santosh Kumar Sahu",
+      "hindiName": "संतोष कुमार साहू",
+      "stationCode": "R",
+      "stationName": "Raipur Junction",
+      "phone": "+91 94060 88219",
+      "rating": 4.85,
+      "reviewsCount": 248,
+      "completedTrips": 219,
+      "photoUrl": "/images/coolie-2.png",
+      "policeVerified": true,
+      "medicalFitnessValidTill": "2027-01-15",
+      "experienceYears": 9,
+      "languages": [
+        "Hindi",
+        "Chhattisgarhi"
+      ],
+      "currentLocation": "Platform 1 • VIP Portico Gate 1",
+      "isActive": true
+    },
+    {
+      "id": "sahayak-durg-019",
+      "billaNumber": "DURG-019",
+      "pin": "0190",
+      "name": "Dilip Kumar Verma",
+      "hindiName": "दिलीप कुमार वर्मा",
+      "stationCode": "DURG",
+      "stationName": "Durg Junction",
+      "phone": "+91 97555 12044",
+      "rating": 4.95,
+      "reviewsCount": 405,
+      "completedTrips": 388,
+      "photoUrl": "/images/coolie-3.png",
+      "policeVerified": true,
+      "medicalFitnessValidTill": "2026-12-31",
+      "experienceYears": 18,
+      "languages": [
+        "Hindi",
+        "Chhattisgarhi",
+        "Odia"
+      ],
+      "currentLocation": "Platform 3 • Near Escalator",
+      "isActive": true
+    },
+    {
+      "id": "sahayak-bsp-256",
+      "billaNumber": "BSP-256",
+      "pin": "2560",
+      "name": "Vinod Kumar Baghel",
+      "hindiName": "विनोद कुमार बघेल",
+      "stationCode": "BSP",
+      "stationName": "Bilaspur Junction",
+      "phone": "+91 98263 71902",
+      "rating": 4.8,
+      "reviewsCount": 180,
+      "completedTrips": 164,
+      "photoUrl": "/images/coolie-4.png",
+      "policeVerified": true,
+      "medicalFitnessValidTill": "2027-06-30",
+      "experienceYears": 7,
+      "languages": [
+        "Hindi",
+        "Chhattisgarhi"
+      ],
+      "currentLocation": "Platform 1 • Main Concourse",
+      "isActive": false
+    },
+    {
+      "id": "sahayak-r-114",
+      "billaNumber": "R-114",
+      "pin": "1140",
+      "name": "Rajeshwari Devi",
+      "hindiName": "राजेश्वरी देवी",
+      "stationCode": "R",
+      "stationName": "Raipur Junction",
+      "phone": "+91 99812 65430",
+      "rating": 5,
+      "reviewsCount": 95,
+      "completedTrips": 92,
+      "photoUrl": "/images/coolie-5.png",
+      "policeVerified": true,
+      "medicalFitnessValidTill": "2027-09-30",
+      "experienceYears": 5,
+      "languages": [
+        "Hindi",
+        "Chhattisgarhi"
+      ],
+      "currentLocation": "Platform 2 • Ladies Waiting Hall",
+      "isActive": true
+    }
+  ],
+  "pnrs": [
+    {
+      "pnr": "6412890341",
+      "trainNumber": "12859",
+      "trainName": "Gitanjali Express (गीतांजलि एक्सप्रेस)",
+      "fromStation": "CSMT Mumbai",
+      "toStation": "Howrah Jn",
+      "boardingStation": "Bilaspur Junction (BSP)",
+      "stationCode": "BSP",
+      "stationName": "Bilaspur Junction (BSP)",
+      "platform": "2",
+      "coach": "B4",
+      "berth": "42 (Side Upper)",
+      "seatNumber": "42 (Side Upper)",
+      "eta": "18:45 IST",
+      "arrivalDate": "Today",
+      "coachPosition": "11th coach from Locomotive engine • Near Central FOB 2 stairs",
+      "trainStatus": "Running on Time • 14 km from Champa Jn"
+    },
+    {
+      "pnr": "4251984723",
+      "trainNumber": "12442",
+      "trainName": "Bilaspur Rajdhani Express (बिलासपुर राजधानी)",
+      "fromStation": "New Delhi (NDLS)",
+      "toStation": "Bilaspur Jn",
+      "boardingStation": "Raipur Junction (R)",
+      "stationCode": "R",
+      "stationName": "Raipur Junction (R)",
+      "platform": "1",
+      "coach": "H1",
+      "berth": "14 (Lower Berth)",
+      "seatNumber": "14 (Lower Berth)",
+      "eta": "20:15 IST",
+      "arrivalDate": "Today",
+      "coachPosition": "5th coach from Locomotive engine • Directly adjacent to VIP Portico Gate 1",
+      "trainStatus": "Arriving in 25 mins • Passed Mandir Hasaud"
+    },
+    {
+      "pnr": "8123904512",
+      "trainNumber": "18237",
+      "trainName": "Chhattisgarh Express (छत्तीसगढ़ एक्सप्रेस)",
+      "fromStation": "Korba",
+      "toStation": "Amritsar Jn",
+      "boardingStation": "Durg Junction (DURG)",
+      "stationCode": "DURG",
+      "stationName": "Durg Junction (DURG)",
+      "platform": "3",
+      "coach": "S5",
+      "berth": "28 (Middle Berth)",
+      "seatNumber": "28 (Middle Berth)",
+      "eta": "14:10 IST",
+      "arrivalDate": "Today",
+      "coachPosition": "14th coach from engine • In front of Platform 3 Escalator & Water Booth",
+      "trainStatus": "Approaching Outer Signal • On Time"
+    },
+    {
+      "pnr": "7829104321",
+      "trainNumber": "20826",
+      "trainName": "Bilaspur - Nagpur Vande Bharat (वंदे भारत एक्सप्रेस)",
+      "fromStation": "Nagpur Jn",
+      "toStation": "Bilaspur Jn",
+      "boardingStation": "Bilaspur Junction (BSP)",
+      "stationCode": "BSP",
+      "stationName": "Bilaspur Junction (BSP)",
+      "platform": "1",
+      "coach": "C2",
+      "berth": "19 (Window Seat)",
+      "seatNumber": "19 (Window Seat)",
+      "eta": "16:30 IST",
+      "arrivalDate": "Today",
+      "coachPosition": "2nd coach from Rear Cab • Next to IRCTC Executive Lounge",
+      "trainStatus": "On Time • Speed 110 km/h"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "LOG-INIT-001",
+      "action": "DATABASE_INITIALIZED",
+      "details": "SECR Central Database Initialized with zero dummy data and 5 verified licensed porters.",
+      "timestamp": "2026-11-15T06:28:10.820Z",
+      "performedBy": "SECR DRM Bilaspur Division"
+    }
+  ],
+  "meta": {
+    "version": "2.0.0",
+    "createdAt": "2026-10-24T06:14:47.081Z",
+    "lastUpdated": "2026-11-15T06:28:10.821Z",
+    "databaseEngine": "FileDB"
+  }
+}
