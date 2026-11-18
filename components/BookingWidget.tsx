@@ -380,66 +380,8 @@ export function BookingWidget() {
               </div>
             )}
 
-            {/* Dedicated High-Prominence Passenger Phone & Proceed Pod (Item 3) */}
-            <div className="p-4 sm:p-5 rounded-3xl apple-glass-card border-2 border-amber-400/40 dark:border-amber-400/30 shadow-xl bg-gradient-to-b from-white/95 to-amber-500/[0.04] dark:from-zinc-900/95 dark:to-amber-500/[0.03] space-y-3.5 relative overflow-hidden">
-              {/* Header with Phone Icon and Status */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
-                    <Smartphone className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <label htmlFor="passenger-phone-input" className="block text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight">
-                      {language === "hi_cg" ? "यात्री मोबाइल नंबर दर्ज करें" : "Passenger Mobile Number"}
-                    </label>
-                    <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium block mt-0.5">
-                      {language === "hi_cg" ? "कुली साथी कॉल एवं व्हाट्सएप लाइव ट्रैकिंग हेतु" : "For Sahayak coach arrival calls & WhatsApp"}
-                    </span>
-                  </div>
-                </div>
-
-                {isPassengerLoggedIn ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span className="truncate max-w-[70px]">{passengerUser?.name.split(" ")[0]}</span>
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={openPassengerAuthModal}
-                    className="text-[10px] font-bold text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg bg-amber-400/10 border border-amber-400/20"
-                  >
-                    <Sparkles className="w-3 h-3 text-amber-500" />
-                    <span>{language === "hi_cg" ? "मुफ्त लॉगिन" : "Free Sign In"}</span>
-                  </button>
-                )}
-              </div>
-
-              {/* High-Contrast Phone Input Field with +91 Country Badge */}
-              <div className="relative flex items-center">
-                <div className="absolute left-2.5 px-2 py-1 rounded-xl bg-black/[0.05] dark:bg-white/[0.08] border border-black/[0.06] dark:border-white/10 flex items-center gap-1 text-xs font-black text-slate-800 dark:text-zinc-200 pointer-events-none">
-                  <span>🇮🇳</span>
-                  <span>+91</span>
-                </div>
-                <input
-                  id="passenger-phone-input"
-                  type="tel"
-                  maxLength={10}
-                  value={passengerPhone}
-                  onChange={(e) => setPassengerPhone(e.target.value.replace(/\D/g, ""))}
-                  placeholder={language === "hi_cg" ? "10 अंकों का मोबाइल नंबर" : "10-digit mobile number"}
-                  className="w-full pl-20 pr-4 py-3 rounded-2xl apple-glass-subcard text-base font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 font-mono tracking-wider transition-all placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal border border-black/10 dark:border-white/15"
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-zinc-400 px-0.5">
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>{language === "hi_cg" ? "गोपनीय: केवल आपके कुली साथी को साझा किया जाएगा" : "Zero spam: Shared only with assigned licensed porter"}</span>
-                </span>
-              </div>
-
-              {/* Big Vibrant Next Step Button */}
+            {/* Direct Proceed to Luggage & Fare (No phone number asked - already verified on Login) */}
+            <div className="pt-3 space-y-2">
               <button
                 type="button"
                 onClick={handleProceedToStep2}
@@ -448,6 +390,18 @@ export function BookingWidget() {
                 <Luggage className="w-4 h-4 text-amber-400" />
                 <span>{language === "hi_cg" ? "सामान चुनें एवं सरकारी दर देखें →" : "Choose Luggage & Calculate Govt Fare →"}</span>
               </button>
+
+              {passengerUser && (
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>
+                    {language === "hi_cg" ? "लॉगिन मोबाइल पर कुली संपर्क करेगा:" : "Porter will call verified number:"}{" "}
+                    <strong className="text-slate-800 dark:text-zinc-200">
+                      +91 {passengerUser.phone} ({passengerUser.name.split(" ")[0]})
+                    </strong>
+                  </span>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

@@ -19,6 +19,7 @@ interface AuthContextType {
   // Passenger Auth
   passengerUser: PassengerUser | null;
   isPassengerLoggedIn: boolean;
+  isHydrated: boolean;
   sendPassengerOtp: (phone: string) => Promise<{ success: boolean; otp: string }>;
   verifyPassengerOtp: (
     phone: string,
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isMyBookingsModalOpen, setIsMyBookingsModalOpen] = useState(false);
   const [pastBookings, setPastBookings] = useState<BookingRecord[]>(SAMPLE_PAST_BOOKINGS);
   const [activeSimulatedOtp, setActiveSimulatedOtp] = useState<SimulatedOtp | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Sahayak state
   const [sahayakUser, setSahayakUser] = useState<SahayakProfile | null>(null);
@@ -78,6 +80,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       console.warn("Could not hydrate auth session:", err);
+    } finally {
+      setIsHydrated(true);
     }
   }, []);
 
@@ -196,6 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         passengerUser,
         isPassengerLoggedIn: Boolean(passengerUser),
+        isHydrated,
         sendPassengerOtp,
         verifyPassengerOtp,
         logoutPassenger,

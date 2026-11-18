@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -10,22 +10,62 @@ import MyBookingsModal from "@/components/MyBookingsModal";
 
 export function ClientAppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isDedicatedPartnerHost, setIsDedicatedPartnerHost] = React.useState(false);
 
-  React.useEffect(() => {
+  // Synchronously evaluate if current client context is a dedicated partner host (Sahayak, Supervisor, Admin)
+  const [isDedicatedPartnerHost, setIsDedicatedPartnerHost] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const h = window.location.hostname.toLowerCase();
+    const host = window.location.host.toLowerCase();
+    const port = window.location.port;
+    const path = window.location.pathname.toLowerCase();
+
+    return (
+      h.includes("sahayak") ||
+      host.includes("3001") ||
+      port === "3001" ||
+      path.startsWith("/sahayak") ||
+      h.includes("supervisor") ||
+      host.includes("3002") ||
+      port === "3002" ||
+      path.startsWith("/supervisor") ||
+      h.includes("admin") ||
+      host.includes("3003") ||
+      port === "3003" ||
+      path.startsWith("/admin")
+    );
+  });
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const h = window.location.hostname.toLowerCase();
-      if (h.includes("sahayak") || h.includes("supervisor") || h.includes("admin")) {
-        setIsDedicatedPartnerHost(true);
-      }
-    }
-  }, []);
+      const host = window.location.host.toLowerCase();
+      const port = window.location.port;
+      const path = window.location.pathname.toLowerCase();
 
-  const isPassengerApp =
-    !isDedicatedPartnerHost &&
-    !pathname.startsWith("/sahayak") &&
-    !pathname.startsWith("/supervisor") &&
-    !pathname.startsWith("/admin");
+      const isPartner =
+        h.includes("sahayak") ||
+        host.includes("3001") ||
+        port === "3001" ||
+        path.startsWith("/sahayak") ||
+        h.includes("supervisor") ||
+        host.includes("3002") ||
+        port === "3002" ||
+        path.startsWith("/supervisor") ||
+        h.includes("admin") ||
+        host.includes("3003") ||
+        port === "3003" ||
+        path.startsWith("/admin");
+
+      setIsDedicatedPartnerHost(isPartner);
+    }
+  }, [pathname]);
+
+  const isDedicatedRoute =
+    pathname.startsWith("/sahayak") ||
+    pathname.startsWith("/supervisor") ||
+    pathname.startsWith("/admin");
+
+  const isPassengerApp = !isDedicatedPartnerHost && !isDedicatedRoute;
 
   return (
     <>

@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { Compass, Ticket, ShieldCheck, HardHat } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Compass, Ticket, ShieldCheck, User } from "lucide-react";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
   const { activeBooking, setStep, openBillaModalWithId } = useBooking();
+  const { openMyBookingsModal } = useAuth();
   const { language } = useLanguage();
 
   return (
@@ -73,14 +75,14 @@ export function MobileBottomNav() {
           </span>
         </button>
 
-        {/* Tab 4: Help & Support */}
+        {/* Tab 4: Profile & Settings */}
         <button
-          onClick={() => alert(language === "hi_cg" ? "रेल संगवारी सहायता: 139 पर कॉल करव" : "Rail Sangwari SECR Helpline: Call 139")}
+          onClick={openMyBookingsModal}
           className="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
         >
-          <HardHat className="w-5 h-5 text-amber-500" />
+          <User className="w-5 h-5 text-amber-500" />
           <span className="text-[10px] mt-1 tracking-tight">
-            {language === "hi_cg" ? "मदद (139)" : "Helpline"}
+            {language === "hi_cg" ? "प्रोफाइल" : "Profile"}
           </span>
         </button>
       </div>

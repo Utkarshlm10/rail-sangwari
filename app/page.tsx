@@ -4,21 +4,32 @@ import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useBooking } from "@/context/BookingContext";
+import { useAuth } from "@/context/AuthContext";
 import { BookingWidget } from "@/components/BookingWidget";
 import { VerifyBillaModal } from "@/components/VerifyBillaModal";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { PassengerLandingLogin } from "@/components/PassengerLandingLogin";
 import { ShieldCheck, MapPin, Scale, Award, Sparkles } from "lucide-react";
 import SahayakPage from "./sahayak/page";
 
 export default function HomePage() {
   const { language, t } = useLanguage();
   const { openBillaModalWithId } = useBooking();
-  const [isSahayakHost, setIsSahayakHost] = React.useState(false);
+  const { isPassengerLoggedIn, isHydrated } = useAuth();
+  const [isSahayakHost, setIsSahayakHost] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const h = window.location.hostname.toLowerCase();
+    const host = window.location.host.toLowerCase();
+    const port = window.location.port;
+    return h.includes("sahayak") || host.includes("3001") || port === "3001";
+  });
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const h = window.location.hostname.toLowerCase();
-      if (h.includes("sahayak")) {
+      const host = window.location.host.toLowerCase();
+      const port = window.location.port;
+      if (h.includes("sahayak") || host.includes("3001") || port === "3001") {
         setIsSahayakHost(true);
       }
     }
@@ -26,6 +37,20 @@ export default function HomePage() {
 
   if (isSahayakHost) {
     return <SahayakPage />;
+  }
+
+  // 1. Initial State: While hydrating session from storage, display sleek ambient canvas
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen apple-glass-canvas flex items-center justify-center p-4">
+        <div className="w-8 h-8 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  // 2. Gate Screen: If passenger is not logged in, show dedicated Login Page as starting page
+  if (!isPassengerLoggedIn) {
+    return <PassengerLandingLogin />;
   }
 
   return (

@@ -105,23 +105,15 @@ export function Navbar() {
 
           {/* Controls: Language, Theme & Mobile Menu */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Passenger Sign In / My Bookings Pill */}
-            {isPassengerLoggedIn ? (
+            {/* Passenger Profile Pill (when logged in) */}
+            {isPassengerLoggedIn && (
               <button
                 onClick={openMyBookingsModal}
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.06] dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white transition-all active:scale-95"
-                title="My Bookings"
+                title="Profile & Bookings"
               >
-                <Ticket className="w-3.5 h-3.5 text-slate-600 dark:text-zinc-300" />
+                <User className="w-3.5 h-3.5 text-amber-500" />
                 <span className="truncate max-w-[90px]">{passengerUser?.name.split(" ")[0]}</span>
-              </button>
-            ) : (
-              <button
-                onClick={openPassengerAuthModal}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.06] dark:border-white/10 text-xs font-bold text-slate-800 dark:text-white transition-all active:scale-95"
-              >
-                <User className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
-                <span>{language === "hi_cg" ? "लॉगिन" : "Sign In"}</span>
               </button>
             )}
 
@@ -178,8 +170,8 @@ export function Navbar() {
                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-black/[0.04] dark:bg-white/[0.08] text-slate-900 dark:text-white border border-black/[0.06] dark:border-white/10 text-left"
               >
                 <div className="flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-slate-600 dark:text-zinc-300" />
-                  <span>{language === "hi_cg" ? "मेरी बुकिंग" : "My Bookings"}</span>
+                  <User className="w-4 h-4 text-amber-500" />
+                  <span>{language === "hi_cg" ? "मेरी प्रोफाइल एवं बुकिंग" : "My Profile & Bookings"}</span>
                 </div>
                 <span className="text-[10px] font-semibold">{passengerUser?.name}</span>
               </button>
